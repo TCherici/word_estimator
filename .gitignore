@@ -56,3 +56,4 @@ venv_build_windows/
 
 # Wine
 .wine/
+*.xlsx

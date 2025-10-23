@@ -17,6 +17,17 @@ A simple desktop application that counts keyword occurrences in PDF files and ca
 
 ### For Users (Standalone Executable)
 
+**IMPORTANT for Windows users:** The executable requires external dependencies.
+
+**Automated Setup (Recommended for Windows):**
+1. Download `setup_windows_deps.bat` from the releases
+2. Right-click and select "Run as administrator"
+3. Follow the prompts to install Tesseract OCR and Poppler
+4. Restart your computer after installation
+5. Run `word_estimator.exe`
+
+**Manual Setup:**
+
 1. **Install Tesseract OCR** (required for image-based PDFs):
 
    **Windows:**

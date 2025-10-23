@@ -15,27 +15,26 @@ PDF Keyword Value Estimator
 A GUI application to count keyword occurrences in PDF files and calculate their total value.
 """
 
-import sys
-import re
 import csv
+import re
+import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
-from datetime import datetime
 
 import fitz  # PyMuPDF
 import pytesseract
-from pdf2image import convert_from_path
-from PIL import Image
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QLineEdit, QTableWidget, QTableWidgetItem,
-    QFileDialog, QTextEdit, QMessageBox, QHeaderView, QGroupBox,
-    QProgressDialog, QRadioButton, QButtonGroup
-)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLabel, QTableWidget, QTableWidgetItem,
+    QFileDialog, QTextEdit, QMessageBox, QHeaderView, QGroupBox,
+    QProgressDialog
+)
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
+from pdf2image import convert_from_path
 
 
 class OCRWorker(QThread):
@@ -448,11 +447,48 @@ class KeywordEstimatorApp(QMainWindow):
         if self.progress_dialog:
             self.progress_dialog.close()
 
+        # Detect specific errors and provide helpful messages
+        error_lower = error_message.lower()
+
+        if "tesseract" in error_lower and "not found" in error_lower:
+            detailed_msg = (
+                f"{error_message}\n\n"
+                "Tesseract OCR is not installed or not in your system PATH.\n\n"
+                "Windows users:\n"
+                "1. Download and run setup_windows_deps.bat (as administrator)\n"
+                "   OR\n"
+                "2. Install manually from: https://github.com/UB-Mannheim/tesseract/wiki\n\n"
+                "Linux users:\n"
+                "   sudo apt-get install tesseract-ocr\n\n"
+                "macOS users:\n"
+                "   brew install tesseract"
+            )
+        elif "poppler" in error_lower or "pdf2image" in error_lower:
+            detailed_msg = (
+                f"{error_message}\n\n"
+                "Poppler is not installed or not in your system PATH.\n\n"
+                "Windows users:\n"
+                "1. Download and run setup_windows_deps.bat (as administrator)\n"
+                "   OR\n"
+                "2. Install manually from: https://github.com/oschwartz10612/poppler-windows/releases\n\n"
+                "Linux users:\n"
+                "   sudo apt-get install poppler-utils\n\n"
+                "macOS users:\n"
+                "   brew install poppler"
+            )
+        else:
+            detailed_msg = (
+                f"{error_message}\n\n"
+                "Please ensure Tesseract OCR and Poppler are properly installed on your system.\n\n"
+                "Windows: Run setup_windows_deps.bat as administrator\n"
+                "Linux: sudo apt-get install tesseract-ocr poppler-utils\n"
+                "macOS: brew install tesseract poppler"
+            )
+
         QMessageBox.critical(
             self,
-            "OCR Error",
-            f"{error_message}\n\n"
-            "Please ensure Tesseract OCR is properly installed on your system."
+            "OCR Error - Missing Dependencies",
+            detailed_msg
         )
 
     def on_ocr_canceled(self):
